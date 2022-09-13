@@ -36,6 +36,7 @@
     <Reference Include="NetEti.Global">
       <HintPath>..\..\..\ReadyBin\Assemblies\NetEti.Global.dll</HintPath>
     </Reference>
+    <Reference Include="PresentationFramework" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />

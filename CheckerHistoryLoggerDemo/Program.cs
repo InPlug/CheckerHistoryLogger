@@ -11,6 +11,10 @@ namespace CheckerHistoryLoggerDemo
         private static CheckerHistoryLogger demoChecker;
         static void Main(string[] args)
         {
+            if (!Directory.Exists(@"../Snapshots"))
+            {
+                Directory.CreateDirectory(@"../Snapshots");
+            }
             demoChecker = new CheckerHistoryLogger();
             demoChecker.NodeProgressChanged += SubNodeProgressChanged;
             Check_DiskSpace();
@@ -20,9 +24,8 @@ namespace CheckerHistoryLoggerDemo
 
         private static void Check_DiskSpace()
         {
-            //bool? logicalResult = demoChecker.Run(@"quiet|Ermittelt den aktuellen Plattenplatz auf Laufwerk C.|CheckDiskSpace.dll|C|20184|100|3|ermittelt den Plattenplatz",
-            //    new TreeParameters("MainTree", null) { CheckerDllDirectory = Directory.GetCurrentDirectory() }, null);
-            bool? logicalResult = demoChecker.Run(@"Ermittelt den Plattenplatz auf Laufwerk C über einen längeren Zeitraum.|CheckDiskSpace.dll|C|20184|100|3|ermittelt den Plattenplatz",
+            bool? logicalResult = demoChecker.Run(
+                @"Ermittelt den Plattenplatz auf Laufwerk C über einen längeren Zeitraum.|CheckDiskSpace.dll|C|20184|100|3|ermittelt den Plattenplatz",
                 new TreeParameters("MainTree", null) { CheckerDllDirectory = Directory.GetCurrentDirectory() }, null);
             ShowResult(logicalResult);
         }
@@ -37,8 +40,17 @@ namespace CheckerHistoryLoggerDemo
                 default: logicalResultString = "null"; break;
             }
             string recordsString = demoChecker.ReturnObject.ToString();
-            Console.WriteLine("LogicalResult: {0}\nResult: {1}",
-                logicalResultString, recordsString);
+            Console.WriteLine("LogicalResult: {0}\nResult: {1}", logicalResultString, recordsString);
+            if (demoChecker.ReturnObject is CheckerHistoryLogger_ReturnObject)
+            {
+                CheckerHistoryLogger_ReturnObject checkerHistoryLogger_ReturnObject
+                    = demoChecker.ReturnObject as CheckerHistoryLogger_ReturnObject;
+                foreach (CheckerHistoryLogger_ReturnObject.SubResult subResult
+                    in checkerHistoryLogger_ReturnObject.SubResultContainer.SubResults)
+                {
+                    Console.WriteLine("\t\tSubResult: {0}", subResult.ToString());
+                }
+            }
         }
 
         private static void FreeDemoChecker()

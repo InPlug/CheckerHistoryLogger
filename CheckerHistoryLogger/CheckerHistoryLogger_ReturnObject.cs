@@ -59,7 +59,7 @@ namespace Vishnu_UserModules
             /// <summary>
             /// Überschriebene ToString()-Methode.
             /// </summary>
-            /// <returns>Id des Knoten + ":" + ReturnObject.ToString()</returns>
+            /// <returns>Dieser SubResultListContainer.ToString().</returns>
             public override string ToString()
             {
                 StringBuilder stringBuilder = new StringBuilder();
@@ -76,10 +76,10 @@ namespace Vishnu_UserModules
             }
 
             /// <summary>
-            /// Vergleicht Dieses Result mit einem übergebenen Result nach Inhalt.
+            /// Vergleicht dieses Objekt mit einem übergebenen Objekt nach Inhalt.
             /// </summary>
-            /// <param name="obj"></param>
-            /// <returns>True, wenn das übergebene Result inhaltlich (ohne Timestamp) gleich diesem Result ist.</returns>
+            /// <param name="obj">Der zu vergleichende SubResultListContainer.</param>
+            /// <returns>True, wenn der übergebene SubResultListContainer inhaltlich gleich diesem SubResultListContainer ist.</returns>
             public override bool Equals(object obj)
             {
                 if (obj == null || this.GetType() != obj.GetType())
@@ -106,9 +106,9 @@ namespace Vishnu_UserModules
             }
 
             /// <summary>
-            /// Erzeugt einen eindeutigen Hashcode für dieses Result.
+            /// Erzeugt einen eindeutigen Hashcode für diesen SubResultListContainer.
             /// </summary>
-            /// <returns></returns>
+            /// <returns>Hashcode (int).</returns>
             public override int GetHashCode()
             {
                 return (this.ToString()).GetHashCode();
@@ -154,18 +154,17 @@ namespace Vishnu_UserModules
             /// <summary>
             /// Überschriebene ToString()-Methode.
             /// </summary>
-            /// <returns>Id des Knoten + ":" + ReturnObject.ToString()</returns>
+            /// <returns>Dieser SubResultRecord.ToString().</returns>
             public override string ToString()
             {
                 return this.LongResultString;
             }
 
             /// <summary>
-            /// Vergleicht dieses Result mit einem übergebenen Result nach Inhalt.
-            /// Der Timestamp wird bewusst nicht in den Vergleich einbezogen.
+            /// Vergleicht dieses Objekt mit einem übergebenen Objekt nach Inhalt.
             /// </summary>
-            /// <param name="obj"></param>
-            /// <returns>True, wenn das übergebene Result inhaltlich (ohne Timestamp) gleich diesem Result ist.</returns>
+            /// <param name="obj">Der zu vergleichende SubResultResultRecord.</param>
+            /// <returns>True, wenn der übergebene SubResultRecord inhaltlich gleich diesem SubResultRecord ist.</returns>
             public override bool Equals(object obj)
             {
                 if (obj == null || this.GetType() != obj.GetType())
@@ -184,10 +183,9 @@ namespace Vishnu_UserModules
             }
 
             /// <summary>
-            /// Erzeugt einen eindeutigen Hashcode für dieses Result.
-            /// Der Timestamp wird bewusst nicht in den Vergleich einbezogen.
+            /// Erzeugt einen eindeutigen Hashcode für dieses Objekt.
             /// </summary>
-            /// <returns></returns>
+            /// <returns>Hashcode (int).</returns>
             public override int GetHashCode()
             {
                 return (this.ToString()).GetHashCode();
@@ -234,18 +232,17 @@ namespace Vishnu_UserModules
             /// <summary>
             /// Überschriebene ToString()-Methode.
             /// </summary>
-            /// <returns>Id des Knoten + ":" + ReturnObject.ToString()</returns>
+            /// <returns>Dieses SubResult.ToString().</returns>
             public override string ToString()
             {
                 return String.Format("{0}", this.ResultRecord.ToString());
             }
 
             /// <summary>
-            /// Vergleicht dieses Result mit einem übergebenen Result nach Inhalt.
-            /// Der Timestamp wird bewusst nicht in den Vergleich einbezogen.
+            /// Vergleicht dieses Objekt mit einem übergebenen Objekt nach Inhalt.
             /// </summary>
-            /// <param name="obj"></param>
-            /// <returns>True, wenn das übergebene Result inhaltlich (ohne Timestamp) gleich diesem Result ist.</returns>
+            /// <param name="obj">Das zu vergleichende SubResult.</param>
+            /// <returns>True, wenn das übergebene SubResult inhaltlich gleich diesem SubResult ist.</returns>
             public override bool Equals(object obj)
             {
                 if (obj == null || this.GetType() != obj.GetType())
@@ -264,10 +261,9 @@ namespace Vishnu_UserModules
             }
 
             /// <summary>
-            /// Erzeugt einen eindeutigen Hashcode für dieses Result.
-            /// Der Timestamp wird bewusst nicht in den Vergleich einbezogen.
+            /// Erzeugt einen eindeutigen Hashcode für dieses SubResult.
             /// </summary>
-            /// <returns></returns>
+            /// <returns>Hashcode (int).</returns>
             public override int GetHashCode()
             {
                 return (this.ToString()).GetHashCode();
@@ -375,10 +371,31 @@ namespace Vishnu_UserModules
         }
 
         /// <summary>
-        /// Vergleicht dieses Result mit einem übergebenen Result nach Inhalt.
+        /// Spezielle ToString()-Methode - stellt öffentliche Properties unter Ausklammerung des
+        /// Timestamps als einen (mehrzeiligen) aufbereiteten String zur Verfügung.
+        /// </summary>
+        /// <returns>Alle öffentlichen Properties (ohne Timestamp) als ein String aufbereitet.</returns>
+        protected string ToStringWithoutTimestamp()
+        {
+            string subCheckerReturnObjectString = this.SubCheckerReturnObject.ToString();
+            string logicalResultStr = this.LogicalResult.ToString();
+            StringBuilder str = new StringBuilder(subCheckerReturnObjectString);
+            str.Append(String.Format("\n{0} (Info: {1})", logicalResultStr == "" ? "null" : logicalResultStr, this.Comment));
+            // str.Append(String.Format("\nletzte Auswertung: {0:dd.MM.yyyy HH:mm}", this.Timestamp));
+            str.Append(String.Format("\nAnzahl Werte: {0}", this.RecordCount));
+            //str.Append("\nRecords:");
+            //foreach (SubResult subResult in this.SubResultContainer.SubResults)
+            //{
+            //    str.Append(String.Format("\n    {0}", subResult.ToString()));
+            //}
+            return str.ToString();
+        }
+
+        /// <summary>
+        /// Vergleicht dieses Objekt mit einem übergebenen Objekt nach Inhalt.
         /// Der Timestamp wird bewusst nicht in den Vergleich einbezogen.
         /// </summary>
-        /// <param name="obj">Das zu vergleichende Result.</param>
+        /// <param name="obj">Das zu vergleichende CheckerHistoryLogger_ReturnObject.</param>
         /// <returns>True, wenn das übergebene Result inhaltlich (ohne Timestamp) gleich diesem Result ist.</returns>
         public override bool Equals(object obj)
         {
@@ -390,7 +407,7 @@ namespace Vishnu_UserModules
             {
                 return true;
             }
-            if (this.ToString() != obj.ToString())
+            if (this.ToStringWithoutTimestamp() != (obj as CheckerHistoryLogger_ReturnObject).ToStringWithoutTimestamp())
             {
                 return false;
             }
@@ -398,13 +415,13 @@ namespace Vishnu_UserModules
         }
 
         /// <summary>
-        /// Erzeugt einen eindeutigen Hashcode für dieses Result.
+        /// Erzeugt einen eindeutigen Hashcode für dieses CheckerHistoryLogger_ReturnObject.
         /// Der Timestamp wird bewusst nicht in den Vergleich einbezogen.
         /// </summary>
         /// <returns>Hashcode (int).</returns>
         public override int GetHashCode()
         {
-            return (this.ToString()).GetHashCode();
+            return (this.ToStringWithoutTimestamp()).GetHashCode();
         }
     }
 }

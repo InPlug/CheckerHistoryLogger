@@ -9,8 +9,8 @@ using Vishnu.Interchange;
 namespace Vishnu_UserModules
 {
     /// <summary>
-    /// CheckerHistoryLogger erzeugt Logfiles für die Ergebnisse beliebiger Checker.
-    /// Wird selbst als Checker im Job definiert und ruft seinerseits den
+    /// Der CheckerHistoryLogger erzeugt Logfiles für die Ergebnisse beliebiger Checker.
+    /// Er wird selbst als Checker im Job definiert und ruft seinerseits den
     /// tatsächlichen Checker als Sub-Checker auf, dessen Name in den Parametern
     /// übergeben wurde.
     /// Die Dll des Sub-Checkers muss sich (inkl. dort referenzierter Assemblies)

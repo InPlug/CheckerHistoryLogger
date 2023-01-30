@@ -1,6 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+ 	<PropertyGroup>
+   	<VishnuRoot>$(ProjectDir)../../..</VishnuRoot>
+   	<AssemblyRoot>$(VishnuRoot)/ReadyBin/Assemblies</AssemblyRoot>
+	</PropertyGroup>
+	<Import Project="$(ProjectDir)../../AddOn/proj/*" Condition="exists('$(ProjectDir)../../AddOn/proj')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
@@ -33,13 +38,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="NetEti.Global">
-      <HintPath>..\..\..\ReadyBin\Assemblies\NetEti.Global.dll</HintPath>
+      <HintPath>$(AssemblyRoot)\NetEti.Global.dll</HintPath>
     </Reference>
     <Reference Include="NetEti.InfoController">
-      <HintPath>..\..\..\ReadyBin\Assemblies\NetEti.InfoController.dll</HintPath>
+      <HintPath>$(AssemblyRoot)\NetEti.InfoController.dll</HintPath>
     </Reference>
     <Reference Include="NetEti.Logging">
-      <HintPath>..\..\..\ReadyBin\Assemblies\NetEti.Logging.dll</HintPath>
+      <HintPath>$(AssemblyRoot)\NetEti.Logging.dll</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -50,7 +55,7 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="Vishnu.Interchange">
-      <HintPath>..\..\..\ReadyBin\Assemblies\Vishnu.Interchange.dll</HintPath>
+      <HintPath>$(AssemblyRoot)\Vishnu.Interchange.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

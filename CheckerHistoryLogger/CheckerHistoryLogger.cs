@@ -237,6 +237,10 @@ namespace Vishnu_UserModules
             try
             {
                 rtn = this._subChecker.Run(checkerParameters, treeParameters, source);
+                if (rtn == null || this._subChecker.ReturnObject == null)
+                {
+                    return null;
+                }
                 subChecker_ReturnObject = this._subChecker.ReturnObject;
 
                 this.LogSubCheckerData(rtn, subChecker_ReturnObject, this.LoggingRegexId);

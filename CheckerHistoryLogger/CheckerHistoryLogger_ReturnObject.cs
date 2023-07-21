@@ -14,26 +14,27 @@ namespace Vishnu_UserModules
     /// 27.11.2020 Erik Nagel: erstellt
     /// 30.08.2022 Erik Nagel: verallgemeinert.
     /// </remarks>
-    [Serializable()]
+    [DataContract] //[Serializable()]
     public class CheckerHistoryLogger_ReturnObject
     {
         /// <summary>
         /// Wrapper-Klasse um List&lt;SubResult&gt; SubResults.
         /// </summary>
-        [Serializable()]
-        public class SubResultListContainer : ISerializable
+        [DataContract] //[Serializable()]
+        public class SubResultListContainer //: ISerializable
         {
             /// <summary>
             /// 0 bis n Datensätze bestehend aus einem Detail-Ergebnis (bool?) und Detail-Record (hier: string).
             /// </summary>
-            public List<SubResult> SubResults { get; set; }
+            [DataMember]
+            public List<SubResult?>? SubResults { get; set; }
 
             /// <summary>
             /// Standard Konstruktor.
             /// </summary>
             public SubResultListContainer()
             {
-                this.SubResults = new List<SubResult>();
+                this.SubResults = new List<SubResult?>();
             }
 
             /// <summary>
@@ -43,7 +44,7 @@ namespace Vishnu_UserModules
             /// <param name="context">Übertragungs-Kontext.</param>
             protected SubResultListContainer(SerializationInfo info, StreamingContext context)
             {
-                this.SubResults = (List<SubResult>)info.GetValue("SubResults", typeof(List<SubResult>));
+                this.SubResults = (List<SubResult?>?)info.GetValue("SubResults", typeof(List<SubResult>));
             }
 
             /// <summary>
@@ -66,9 +67,9 @@ namespace Vishnu_UserModules
                 string delimiter = "";
                 if (this.SubResults != null)
                 {
-                    foreach (SubResult subResult in this.SubResults)
+                    foreach (SubResult? subResult in this.SubResults)
                     {
-                        stringBuilder.Append(delimiter + subResult.ToString());
+                        stringBuilder.Append(delimiter + subResult?.ToString() ?? "");
                         delimiter = Environment.NewLine;
                     }
                 }
@@ -80,7 +81,7 @@ namespace Vishnu_UserModules
             /// </summary>
             /// <param name="obj">Der zu vergleichende SubResultListContainer.</param>
             /// <returns>True, wenn der übergebene SubResultListContainer inhaltlich gleich diesem SubResultListContainer ist.</returns>
-            public override bool Equals(object obj)
+            public override bool Equals(object? obj)
             {
                 if (obj == null || this.GetType() != obj.GetType())
                 {
@@ -90,8 +91,12 @@ namespace Vishnu_UserModules
                 {
                     return true;
                 }
-                SubResultListContainer subResultList = obj as SubResultListContainer;
-                if (this.SubResults.Count != subResultList.SubResults.Count)
+                if (this.SubResults == null)
+                {
+                    return false;
+                }
+                SubResultListContainer subResultList = (SubResultListContainer)obj;
+                if (this.SubResults.Count != subResultList.SubResults?.Count)
                 {
                     return false;
                 }
@@ -118,13 +123,14 @@ namespace Vishnu_UserModules
         /// <summary>
         /// Klasse für einen Record eines Teilergebnisses.
         /// </summary>
-        [Serializable()]
-        public class SubResultRecord : ISerializable
+        [DataContract] //[Serializable()]
+        public class SubResultRecord //: ISerializable
         {
             /// <summary>
             /// Enthält einen Gesamtstring für das SubResult (ToString()).
             /// </summary>
-            public string LongResultString { get; set; }
+            [DataMember]
+            public string? LongResultString { get; set; }
 
             /// <summary>
             /// Standard Konstruktor.
@@ -155,7 +161,7 @@ namespace Vishnu_UserModules
             /// Überschriebene ToString()-Methode.
             /// </summary>
             /// <returns>Dieser SubResultRecord.ToString().</returns>
-            public override string ToString()
+            public override string? ToString()
             {
                 return this.LongResultString;
             }
@@ -165,7 +171,7 @@ namespace Vishnu_UserModules
             /// </summary>
             /// <param name="obj">Der zu vergleichende SubResultResultRecord.</param>
             /// <returns>True, wenn der übergebene SubResultRecord inhaltlich gleich diesem SubResultRecord ist.</returns>
-            public override bool Equals(object obj)
+            public override bool Equals(object? obj)
             {
                 if (obj == null || this.GetType() != obj.GetType())
                 {
@@ -188,21 +194,22 @@ namespace Vishnu_UserModules
             /// <returns>Hashcode (int).</returns>
             public override int GetHashCode()
             {
-                return (this.ToString()).GetHashCode();
+                return (this.ToString() ?? "").GetHashCode();
             }
         }
 
         /// <summary>
         /// Klasse für ein Teilergebnis.
         /// </summary>
-        [Serializable()]
-        public class SubResult : ISerializable
+        [DataContract] //[Serializable()]
+        public class SubResult //: ISerializable
         {
             /// <summary>
             /// Der Wert einer Detail-Information der Prüfroutine
             /// (i.d.R int).
             ///  </summary>
-            public SubResultRecord ResultRecord { get; set; }
+            [DataMember]
+            public SubResultRecord? ResultRecord { get; set; }
 
             /// <summary>
             /// Standard Konstruktor.
@@ -216,7 +223,7 @@ namespace Vishnu_UserModules
             /// <param name="context">Übertragungs-Kontext.</param>
             protected SubResult(SerializationInfo info, StreamingContext context)
             {
-                this.ResultRecord = (SubResultRecord)info.GetValue("ResultRecord", typeof(SubResultRecord));
+                this.ResultRecord = (SubResultRecord?)info.GetValue("ResultRecord", typeof(SubResultRecord));
             }
 
             /// <summary>
@@ -235,7 +242,7 @@ namespace Vishnu_UserModules
             /// <returns>Dieses SubResult.ToString().</returns>
             public override string ToString()
             {
-                return String.Format("{0}", this.ResultRecord.ToString());
+                return String.Format("{0}", this.ResultRecord?.ToString());
             }
 
             /// <summary>
@@ -243,7 +250,7 @@ namespace Vishnu_UserModules
             /// </summary>
             /// <param name="obj">Das zu vergleichende SubResult.</param>
             /// <returns>True, wenn das übergebene SubResult inhaltlich gleich diesem SubResult ist.</returns>
-            public override bool Equals(object obj)
+            public override bool Equals(object? obj)
             {
                 if (obj == null || this.GetType() != obj.GetType())
                 {
@@ -273,39 +280,46 @@ namespace Vishnu_UserModules
         /// <summary>
         /// Return-Objekt des aufgerufenen SubCheckers.
         /// </summary>
-        public object SubCheckerReturnObject { get; set; }
+        [DataMember]
+        public object? SubCheckerReturnObject { get; set; }
 
         /// <summary>
         /// Wrapper-Klasse um List&lt;SubResult&gt; SubResults.
         /// </summary>
-        public SubResultListContainer SubResultContainer { get; set; }
+        [DataMember]
+        public SubResultListContainer? SubResultContainer { get; set; }
 
         /// <summary>
         /// Das logische Gesamtergebnis eines Prüfprozesses:
         /// true, false oder null.
         /// </summary>
+        [DataMember]
         public bool? LogicalResult { get; set; }
 
         /// <summary>
         /// Die Anzahl der Treffer, die das Prüfkriterium erfüllen.
         /// </summary>
-        public long RecordCount { get; set; }
+        [DataMember]
+        public long? RecordCount { get; set; }
 
         /// <summary>
         /// Aufbereiteter Zeitstempel der letzten Auswertung.
         /// </summary>
-        public DateTime Timestamp { get; set; }
+        [DataMember]
+        public DateTime? Timestamp { get; set; }
 
         /// <summary>
         /// Name der Datei mit den letzten SubChecker-Werten.
         /// </summary>
-        public string SubCheckerResultsInfoFile { get; set; }
+        [DataMember]
+        public string? SubCheckerResultsInfoFile { get; set; }
 
         /// <summary>
         /// Klartext-Informationen zur Prüfroutine
         /// (was die Routine prüft).
         ///  </summary>
-        public string Comment { get; set; }
+        [DataMember]
+        public string? Comment { get; set; }
 
         /// <summary>
         /// Standard Konstruktor.
@@ -323,11 +337,11 @@ namespace Vishnu_UserModules
         /// <param name="context">Übertragungs-Kontext.</param>
         protected CheckerHistoryLogger_ReturnObject(SerializationInfo info, StreamingContext context)
         {
-            this.SubCheckerReturnObject = (Object)info.GetValue("SubCheckerReturnObject", typeof(Object));
-            this.SubResultContainer = (SubResultListContainer)info.GetValue("SubResults", typeof(SubResultListContainer));
+            this.SubCheckerReturnObject = (Object?)info.GetValue("SubCheckerReturnObject", typeof(Object));
+            this.SubResultContainer = (SubResultListContainer?)info.GetValue("SubResults", typeof(SubResultListContainer));
             this.LogicalResult = (bool?)info.GetValue("LogicalResult", typeof(bool?));
-            this.RecordCount = (long)info.GetValue("RecordCount", typeof(long));
-            this.Timestamp = (DateTime)info.GetValue("Timestamp", typeof(DateTime));
+            this.RecordCount = (long?)info.GetValue("RecordCount", typeof(long));
+            this.Timestamp = (DateTime?)info.GetValue("Timestamp", typeof(DateTime));
             this.SubCheckerResultsInfoFile = info.GetString("SubCheckerResultsInfoFile");
             this.Comment = info.GetString("Comment");
         }
@@ -355,8 +369,8 @@ namespace Vishnu_UserModules
         /// <returns>Alle öffentlichen Properties als ein String aufbereitet.</returns>
         public override string ToString()
         {
-            string subCheckerReturnObjectString = this.SubCheckerReturnObject.ToString();
-            string logicalResultStr = this.LogicalResult.ToString();
+            string? subCheckerReturnObjectString = this.SubCheckerReturnObject?.ToString();
+            string? logicalResultStr = this.LogicalResult.ToString();
             StringBuilder str = new StringBuilder(subCheckerReturnObjectString);
             str.Append(String.Format("\n{0} (Info: {1})", logicalResultStr == "" ? "null" : logicalResultStr, this.Comment));
             // str.Append(String.Format("\nLogdatei: {0}", this.SubCheckerResultsInfoFile));
@@ -377,8 +391,8 @@ namespace Vishnu_UserModules
         /// <returns>Alle öffentlichen Properties (ohne Timestamp) als ein String aufbereitet.</returns>
         protected string ToStringWithoutTimestamp()
         {
-            string subCheckerReturnObjectString = this.SubCheckerReturnObject.ToString();
-            string logicalResultStr = this.LogicalResult.ToString();
+            string? subCheckerReturnObjectString = this.SubCheckerReturnObject?.ToString();
+            string? logicalResultStr = this.LogicalResult.ToString();
             StringBuilder str = new StringBuilder(subCheckerReturnObjectString);
             str.Append(String.Format("\n{0} (Info: {1})", logicalResultStr == "" ? "null" : logicalResultStr, this.Comment));
             // str.Append(String.Format("\nletzte Auswertung: {0:dd.MM.yyyy HH:mm}", this.Timestamp));
@@ -397,7 +411,7 @@ namespace Vishnu_UserModules
         /// </summary>
         /// <param name="obj">Das zu vergleichende CheckerHistoryLogger_ReturnObject.</param>
         /// <returns>True, wenn das übergebene Result inhaltlich (ohne Timestamp) gleich diesem Result ist.</returns>
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj == null || this.GetType() != obj.GetType())
             {
@@ -407,7 +421,7 @@ namespace Vishnu_UserModules
             {
                 return true;
             }
-            if (this.ToStringWithoutTimestamp() != (obj as CheckerHistoryLogger_ReturnObject).ToStringWithoutTimestamp())
+            if (this.ToStringWithoutTimestamp() != ((CheckerHistoryLogger_ReturnObject)obj).ToStringWithoutTimestamp())
             {
                 return false;
             }

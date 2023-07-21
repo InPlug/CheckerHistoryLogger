@@ -2,6 +2,7 @@
 using NetEti.Globals;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using Vishnu.Interchange;
@@ -40,12 +41,12 @@ namespace Vishnu_UserModules
         /// des Checkers geändert hat, muss aber zumindest aber einmal zum
         /// Schluss der Verarbeitung aufgerufen werden.
         /// </summary>
-        public event CommonProgressChangedEventHandler NodeProgressChanged;
+        public event ProgressChangedEventHandler? NodeProgressChanged;
 
         /// <summary>
         /// Rückgabe-Objekt des Checkers
         /// </summary>
-        public object ReturnObject { get; set; }
+        public object? ReturnObject { get; set; }
 
         /// <summary>
         /// Hier wird der Arbeitsprozess ausgeführt (oder beobachtet).
@@ -54,20 +55,22 @@ namespace Vishnu_UserModules
         /// <param name="treeParameters">Für den gesamten Tree gültige Parameter, enthält den Pfad zum Job/Plugin-Verzeichnis.</param>
         /// <param name="source">Auslösendes TreeEvent (kann null sein).</param>
         /// <returns>True, False oder null</returns>
-        public bool? Run(object checkerParameters, TreeParameters treeParameters, TreeEvent source)
+        public bool? Run(object? checkerParameters, TreeParameters treeParameters, TreeEvent source)
         {
-            this._checkerDllDirectory = treeParameters.CheckerDllDirectory;
-            this.OnNodeProgressChanged(this.GetType().Name, 100, 0, ItemsTypes.items);
+            this._checkerDllDirectory = treeParameters.CheckerDllDirectory
+                ?? throw new ArgumentNullException("CheckerDllDirectory ist nicht gesetzt.");
+            this.OnNodeProgressChanged(0);
             this.ReturnObject = null; // optional: in UserChecker_ReturnObject IDisposable implementieren und hier aufrufen.
-            if (this._paraString != (checkerParameters ?? "").ToString())
+            String? paraString = checkerParameters?.ToString();
+            if (paraString != null && this._paraString != paraString)
             {
-                this._paraString = (checkerParameters ?? "").ToString();
+                this._paraString = paraString;
                 this.EvaluateParametersOrFail(this._paraString);
             }
             //--- Aufruf der Checker-Business-Logik ----------
             bool? returnCode = this.Work(this._subCheckerParaString, treeParameters, source);
             //------------------------------------------------
-            this.OnNodeProgressChanged(this.GetType().Name, 100, 100, ItemsTypes.items); // erforderlich!
+            this.OnNodeProgressChanged(100); // erforderlich!
             return returnCode;
         }
 
@@ -92,6 +95,9 @@ namespace Vishnu_UserModules
             this._logger = new Logger();
             InfoType[] loggerInfos = InfoTypes.Collection2InfoTypeArray(InfoTypes.All);
             this._publisher.RegisterInfoReceiver(this._logger, loggerInfos);
+            this._checkerDllDirectory = String.Empty;
+            this.LoggingRegexId = String.Empty;
+            this._subCheckerResultsInfoFile = String.Empty;
         }
 
         #region IDisposable Implementation
@@ -172,11 +178,12 @@ namespace Vishnu_UserModules
         protected virtual void LogSubCheckerData(bool? logicalResult, object subCheckerReturnObject, string loggingRegexId)
         {
             string timestamp = DateTime.Now.ToString("dd.MM.yy HH:mm:ss,fff");
-            string logicalResultString = (logicalResult == null ? "null" : logicalResult.ToString());
-            string subcheckerReturnObjectToStringOneLine = subCheckerReturnObject.ToString().Replace(Environment.NewLine, " ").Replace("\n", " ").Replace("\r", "");
+            string logicalResultString = logicalResult.ToString() ?? "null";
+            string subString = subCheckerReturnObject.ToString() ?? "";
+            string subcheckerReturnObjectToStringOneLine = subString.Replace(Environment.NewLine, " ").Replace("\n", " ").Replace("\r", "");
             string message = String.Format($"{timestamp} {logicalResultString} - {subcheckerReturnObjectToStringOneLine}");
             this._publisher.Publish(this, loggingRegexId + " " + message, InfoType.Milestone);
-            this._subCheckerResultsLogger.Flush();
+            this._subCheckerResultsLogger?.Flush();
         }
 
         /// <summary>
@@ -192,7 +199,7 @@ namespace Vishnu_UserModules
         protected virtual List<object> ReadHistory(string loggingRegexId)
         {
             List<object> records = new List<object>();
-            string line;
+            string? line;
             if (File.Exists(this._subCheckerResultsInfoFile))
             {
                 using (System.IO.StreamReader file = new System.IO.StreamReader(this._subCheckerResultsInfoFile, System.Text.Encoding.Default))
@@ -212,51 +219,50 @@ namespace Vishnu_UserModules
         #region private members
 
         private IInfoController _publisher;
-        private INodeChecker _subChecker;
+        private INodeChecker? _subChecker;
         private VishnuAssemblyLoader _assemblyLoader;
         private string _checkerDllDirectory;
-        private Logger _subCheckerResultsLogger;
-        private CheckerHistoryLogger_ReturnObject _checkerHistoryLogger_ReturnObject;
+        private Logger? _subCheckerResultsLogger;
+        private CheckerHistoryLogger_ReturnObject? _checkerHistoryLogger_ReturnObject;
         private bool _quiet;
-        private string _paraString;
-        private string _comment;
-        private string _subCheckerName;
-        private string _subCheckerPath;
-        private string _subCheckerParaString;
+        private string? _paraString;
+        private string? _comment;
+        private string? _subCheckerName;
+        private string? _subCheckerPath;
+        private string? _subCheckerParaString;
         private string _subCheckerResultsInfoFile;
 
         private Logger _logger;
 
-        private bool? Work(object checkerParameters, TreeParameters treeParameters, TreeEvent source)
+        private bool? Work(object? checkerParameters, TreeParameters treeParameters, TreeEvent source)
         {
             // Hier folgt die eigentliche Checker-Verarbeitung, die einen erweiterten boolean als Rückgabe
             // dieses Checkers ermittelt und ggf. auch ein Return-Objekt mit zusätzlichen Informationen füllt.
             bool? rtn;
             List<object> records = new List<object>();
             object subChecker_ReturnObject;
-            try
+            rtn = this._subChecker?.Run(checkerParameters, treeParameters, source);
+            if (rtn == null || this._subChecker?.ReturnObject == null)
             {
-                rtn = this._subChecker.Run(checkerParameters, treeParameters, source);
-                if (rtn == null || this._subChecker.ReturnObject == null)
-                {
-                    return null;
-                }
-                subChecker_ReturnObject = this._subChecker.ReturnObject;
-
-                this.LogSubCheckerData(rtn, subChecker_ReturnObject, this.LoggingRegexId);
-
-                records = this.ReadHistory(this.LoggingRegexId);
+                return null;
             }
-            catch (Exception ex2)
+            subChecker_ReturnObject = this._subChecker.ReturnObject;
+
+            this.LogSubCheckerData(rtn, subChecker_ReturnObject, this.LoggingRegexId);
+
+            records = this.ReadHistory(this.LoggingRegexId);
+
+            if (this._checkerHistoryLogger_ReturnObject != null)
             {
-                this.Publish("Exception: " + ex2.Message);
-                throw;
+                this._checkerHistoryLogger_ReturnObject.SubCheckerReturnObject = subChecker_ReturnObject;
+                this._checkerHistoryLogger_ReturnObject.SubResultContainer?.SubResults?.Clear();
+                rtn &= this.RecordsToResult(records, this._checkerHistoryLogger_ReturnObject);
+                this._checkerHistoryLogger_ReturnObject.LogicalResult = rtn;
             }
-
-            this._checkerHistoryLogger_ReturnObject.SubCheckerReturnObject = subChecker_ReturnObject;
-            this._checkerHistoryLogger_ReturnObject.SubResultContainer.SubResults.Clear();
-            rtn &= this.RecordsToResult(records);
-            this._checkerHistoryLogger_ReturnObject.LogicalResult = rtn;
+            else
+            {
+                throw new ApplicationException("_checkerHistoryLogger_ReturnObject ist null.");
+            }
             if (this._quiet)
             {
                 this.ReturnObject = subChecker_ReturnObject;
@@ -343,31 +349,32 @@ namespace Vishnu_UserModules
                 this._subChecker.NodeProgressChanged -= _subChecker_NodeProgressChanged;
                 if (this._subChecker is IDisposable)
                 {
-                    (this._subChecker as IDisposable).Dispose();
+                    ((IDisposable)this._subChecker).Dispose();
                 }
             }
         }
 
         private void LoadSubChecker()
         {
-            this._subChecker = this.DynamicLoadSlaveDll(this._subCheckerPath);
+            this._subChecker = this.DynamicLoadSlaveDll(this._subCheckerPath ?? "")
+                ?? throw new ApplicationException(this._subCheckerPath + " konnte nicht geladern werden.");
             this._subChecker.NodeProgressChanged += _subChecker_NodeProgressChanged;
         }
 
-        private void _subChecker_NodeProgressChanged(object sender, CommonProgressChangedEventArgs args)
+        private void _subChecker_NodeProgressChanged(object? sender, ProgressChangedEventArgs args)
         {
-            this.OnNodeProgressChanged(this.GetType().Name, (int)args.CountAll, (int)args.CountSucceeded, args.ItemsType);
+            this.OnNodeProgressChanged(args.ProgressPercentage);
         }
 
-        private void OnNodeProgressChanged(string itemsName, int countAll, int countSucceeded, ItemsTypes itemsType)
+        private void OnNodeProgressChanged(int progressPercentage)
         {
-            NodeProgressChanged?.Invoke(null, new CommonProgressChangedEventArgs(itemsName, countAll, countSucceeded, itemsType, null));
+            NodeProgressChanged?.Invoke(null, new ProgressChangedEventArgs(progressPercentage, null));
         }
 
-        private bool RecordsToResult(List<object> records)
+        private bool RecordsToResult(List<object> records, CheckerHistoryLogger_ReturnObject returnObject)
         {
-            this._checkerHistoryLogger_ReturnObject.Timestamp = DateTime.Now;
-            this._checkerHistoryLogger_ReturnObject.RecordCount = records.Count;
+            returnObject.Timestamp = DateTime.Now;
+            returnObject.RecordCount = records.Count;
             bool rtn = true;
             int recordsCount = records != null ? records.Count : 0;
             if (recordsCount == 0)
@@ -380,8 +387,8 @@ namespace Vishnu_UserModules
                 {
                     CheckerHistoryLogger_ReturnObject.SubResult subResult = new CheckerHistoryLogger_ReturnObject.SubResult();
                     subResult.ResultRecord = new CheckerHistoryLogger_ReturnObject.SubResultRecord();
-                    subResult.ResultRecord.LongResultString = records[i].ToString();
-                    this._checkerHistoryLogger_ReturnObject.SubResultContainer.SubResults.Add(subResult);
+                    subResult.ResultRecord.LongResultString = records[i]?.ToString() ?? "null";
+                    returnObject.SubResultContainer?.SubResults?.Add(subResult);
                 }
             }
             return rtn;
@@ -391,9 +398,9 @@ namespace Vishnu_UserModules
         // aus der Dll kennen, Bedingung ist nur, dass eine Klasse in der Dll das
         // Interface INodeChecker implementiert. Die erste gefundene Klasse wird
         // als Instanz von INodeChecker zurückgegeben.
-        private INodeChecker DynamicLoadSlaveDll(string slavePathName)
+        private INodeChecker? DynamicLoadSlaveDll(string slavePathName)
         {
-            return (INodeChecker)this._assemblyLoader
+            return (INodeChecker?)this._assemblyLoader
                 .DynamicLoadObjectOfTypeFromAssembly(slavePathName, typeof(INodeChecker));
         }
 

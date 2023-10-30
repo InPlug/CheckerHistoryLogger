@@ -37,7 +37,7 @@ namespace Vishnu_UserModules
         #region INodeChecker Implementation
 
         /// <summary>
-        /// Kann aufgerufen werden, wenn sich der Verarbeitungs-Fortschritt
+        /// Kann aufgerufen werden, wenn sich der Verarbeitungsfortschritt
         /// des Checkers geändert hat, muss aber zumindest aber einmal zum
         /// Schluss der Verarbeitung aufgerufen werden.
         /// </summary>
@@ -78,7 +78,7 @@ namespace Vishnu_UserModules
 
         /// <summary>
         /// Kürzel, das den Namen der aktuellen SubChecker-Dll enthält und steuert,
-        /// dass das Logging, welches eigentlich ein broedcasting an alle bedeutet,
+        /// dass das Logging, welches eigentlich ein broadcasting an alle bedeutet,
         /// nur für den in SetupSubCheckerResultsLogging() aufgesetzten Logger
         /// gefiltert wird.
         /// </summary>
@@ -146,7 +146,7 @@ namespace Vishnu_UserModules
 
         /// <summary>
         /// Richtet das Logging für Ergebnisse des SubCheckers ein.
-        /// Diese Standardimplementierung richtet ein einfaches Textfile-Loggin in das DLL-Verzeichnis
+        /// Diese Standardimplementierung richtet ein einfaches Textfile-Logging in das DLL-Verzeichnis
         /// des SubCheckers ein und arbeitet mit ToString.
         /// Für ein spezifischeres Logging mit einem typisierten subCheckerReturnObject kann diese
         /// Routine überschrieben werden.

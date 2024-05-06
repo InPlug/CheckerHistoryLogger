@@ -306,7 +306,12 @@ namespace Vishnu_UserModules
                 this._subCheckerPath = subCheckerPath;
                 this.LoadSubChecker();
             }
-            string historyRootPath = GenericSingletonProvider.GetInstance<AppSettings>().ResolvedSnapshotDirectory;
+            string historyRootPath = Path.Combine(GenericSingletonProvider.GetInstance<AppSettings>().SnapshotDirectory,
+                GenericSingletonProvider.GetInstance<AppSettings>().MainJobName);
+            if (!Directory.Exists(historyRootPath))
+            {
+                Directory.CreateDirectory(historyRootPath);
+            }
             string subCheckerResultsInfoFile = Path.Combine(historyRootPath ?? "", Path.GetFileNameWithoutExtension(this._subCheckerName) + ".log");
             if (!subCheckerResultsInfoFile.Equals(this._subCheckerResultsInfoFile))
             {

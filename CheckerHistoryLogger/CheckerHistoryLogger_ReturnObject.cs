@@ -372,7 +372,8 @@ namespace Vishnu_UserModules
             string? subCheckerReturnObjectString = this.SubCheckerReturnObject?.ToString();
             string? logicalResultStr = this.LogicalResult.ToString();
             StringBuilder str = new StringBuilder(subCheckerReturnObjectString);
-            str.Append(String.Format("\n{0} (Info: {1})", logicalResultStr == "" ? "null" : logicalResultStr, this.Comment));
+            str.Append(String.Format("\n{0} (Info: {1})", logicalResultStr == "" ? "null" : logicalResultStr,
+                this.Comment));
             // str.Append(String.Format("\nLogdatei: {0}", this.SubCheckerResultsInfoFile));
             str.Append(String.Format("\nletzte Auswertung: {0:dd.MM.yyyy HH:mm}", this.Timestamp));
             str.Append(String.Format("\nAnzahl Werte: {0}", this.RecordCount));

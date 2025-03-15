@@ -258,6 +258,14 @@ namespace Vishnu_UserModules
                 this._checkerHistoryLogger_ReturnObject.SubResultContainer?.SubResults?.Clear();
                 rtn &= this.RecordsToResult(records, this._checkerHistoryLogger_ReturnObject);
                 this._checkerHistoryLogger_ReturnObject.LogicalResult = rtn;
+                if (String.IsNullOrWhiteSpace(this._comment))
+                {
+                    this._comment = subChecker_ReturnObject.ToString();
+                }
+                if (String.IsNullOrWhiteSpace(this._checkerHistoryLogger_ReturnObject.Comment))
+                {
+                    this._checkerHistoryLogger_ReturnObject.Comment = this._comment;
+                }
             }
             else
             {

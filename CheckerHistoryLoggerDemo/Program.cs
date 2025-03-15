@@ -26,7 +26,8 @@ namespace CheckerHistoryLoggerDemo
         {
             bool? logicalResult = _demoChecker?.Run(
                 @"Ermittelt den Plattenplatz auf Laufwerk C über einen längeren Zeitraum.|CheckDiskSpace.dll|C|20184|100|3|ermittelt den Plattenplatz",
-                new TreeParameters("MainTree", null) { CheckerDllDirectory = Directory.GetCurrentDirectory() }, TreeEvent.UndefinedTreeEvent);
+                new TreeParameters("MainTree", null) { CheckerDllDirectory = Directory.GetCurrentDirectory() },
+                TreeEvent.UndefinedTreeEvent);
             ShowResult(logicalResult);
         }
 

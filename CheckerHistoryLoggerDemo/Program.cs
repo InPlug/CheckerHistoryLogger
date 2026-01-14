@@ -17,7 +17,8 @@ namespace CheckerHistoryLoggerDemo
             }
             _demoChecker = new CheckerHistoryLogger();
             _demoChecker.NodeProgressChanged += SubNodeProgressChanged;
-            Check_DiskSpace();
+            // Check_DiskSpace();
+            Check_UniversalShareChecker();
             FreeDemoChecker();
             Console.ReadLine();
         }
@@ -26,6 +27,15 @@ namespace CheckerHistoryLoggerDemo
         {
             bool? logicalResult = _demoChecker?.Run(
                 @"Ermittelt den Plattenplatz auf Laufwerk C über einen längeren Zeitraum.|CheckDiskSpace.dll|C|20184|100|3|ermittelt den Plattenplatz",
+                new TreeParameters("MainTree", null) { CheckerDllDirectory = Directory.GetCurrentDirectory() },
+                TreeEvent.UndefinedTreeEvent);
+            ShowResult(logicalResult);
+        }
+
+        private static void Check_UniversalShareChecker()
+        {
+            bool? logicalResult = _demoChecker?.Run(
+                @"Testet einen SubChecker, der ICheckerOwnder implementiert.|Universal_ShareChecker.dll|ShareDescription=BASF.json|true",
                 new TreeParameters("MainTree", null) { CheckerDllDirectory = Directory.GetCurrentDirectory() },
                 TreeEvent.UndefinedTreeEvent);
             ShowResult(logicalResult);

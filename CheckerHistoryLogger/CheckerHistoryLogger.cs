@@ -228,6 +228,7 @@ namespace Vishnu_UserModules
         private string? _paraString;
         private string? _comment;
         private string? _subCheckerName;
+        private string? _subCheckerLoggingName;
         private string? _subCheckerPath;
         private string? _subCheckerParaString;
         private string _subCheckerResultsInfoFile;
@@ -247,7 +248,9 @@ namespace Vishnu_UserModules
                 return null;
             }
             subChecker_ReturnObject = this._subChecker.ReturnObject;
-
+            //-----------------------
+            SetupSubCheckerLogging();
+            //-----------------------
             this.LogSubCheckerData(rtn, subChecker_ReturnObject, this.LoggingRegexId);
 
             records = this.ReadHistory(this.LoggingRegexId);
@@ -304,23 +307,36 @@ namespace Vishnu_UserModules
             {
                 this._subCheckerParaString = String.Join("|", paraStrings);
             }
-            // Sorgt später dafür, dass nur Zeilen, die den SubCheckerName enthalten, geloggt werden.
-            this.LoggingRegexId = String.Format($@"#{Path.GetFileNameWithoutExtension(this._subCheckerName)}#");
-
             string subCheckerPath = Path.Combine(this._checkerDllDirectory, this._subCheckerName);
-            if (!subCheckerPath.Equals(this._subCheckerPath))
+            if (!subCheckerPath.Equals(this._subCheckerPath)) // Erster oder neuer SubChecker
             {
                 this.FreeExistingSubChecker();
                 this._subCheckerPath = subCheckerPath;
                 this.LoadSubChecker();
             }
+        }
+
+        private void SetupSubCheckerLogging()
+        {
+            this._subCheckerLoggingName = Path.GetFileNameWithoutExtension(this._subCheckerName);
+            if (this._subChecker is ICheckerOwner)
+            {
+                string subCheckerCheckerOwnerName = ((ICheckerOwner)this._subChecker).CheckerName;
+                if (String.IsNullOrEmpty(subCheckerCheckerOwnerName))
+                {
+                    throw new ApplicationException("Der SubChecker " + this._subCheckerName + " implementiert ICheckerOwner, liefert aber keinen CheckerName zurück.");
+                }
+                this._subCheckerLoggingName = subCheckerCheckerOwnerName;
+            }
+            // Sorgt später dafür, dass nur Zeilen, die den SubCheckerName enthalten, geloggt werden.
+            this.LoggingRegexId = "#" + this._subCheckerLoggingName + "#";
             string historyRootPath = Path.Combine(GenericSingletonProvider.GetInstance<AppSettings>().SnapshotDirectory,
                 GenericSingletonProvider.GetInstance<AppSettings>().MainJobName);
             if (!Directory.Exists(historyRootPath))
             {
                 Directory.CreateDirectory(historyRootPath);
             }
-            string subCheckerResultsInfoFile = Path.Combine(historyRootPath ?? "", Path.GetFileNameWithoutExtension(this._subCheckerName) + ".log");
+            string subCheckerResultsInfoFile = Path.Combine(historyRootPath ?? "", this._subCheckerLoggingName) + ".log";
             if (!subCheckerResultsInfoFile.Equals(this._subCheckerResultsInfoFile))
             {
                 this._subCheckerResultsLogger?.Dispose();

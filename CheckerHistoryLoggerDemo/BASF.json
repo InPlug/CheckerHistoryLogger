@@ -1,0 +1,12 @@
+{
+  "FullName": "BASF SE NAMENS-AKTIEN O.N. ISIN DE000BASF111 | WKN BASF11",
+  "ShortName": "BASF",
+  "Url": "https://www.tagesschau.de/wirtschaft/boersenkurse/de000basf111-204422817/",
+  "StartCount": 270.00,
+  "StartValue": 91.00,
+  "StartYear": 2017,
+  "CurrentCount": 270.00,
+  "Compensation": -1412.23,
+  "RealCompensation": -1502.98,
+  "Comment": "holt den aktuellen Kurs für die BASF-Aktie"
+}

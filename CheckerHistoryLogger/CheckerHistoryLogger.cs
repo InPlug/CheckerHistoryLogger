@@ -336,7 +336,7 @@ namespace Vishnu_UserModules
             {
                 Directory.CreateDirectory(historyRootPath);
             }
-            string subCheckerResultsInfoFile = Path.Combine(historyRootPath ?? "", this._subCheckerLoggingName) + ".log";
+            string subCheckerResultsInfoFile = Path.Combine(historyRootPath ?? "", this._subCheckerLoggingName ?? "") + ".log";
             if (!subCheckerResultsInfoFile.Equals(this._subCheckerResultsInfoFile))
             {
                 this._subCheckerResultsLogger?.Dispose();
